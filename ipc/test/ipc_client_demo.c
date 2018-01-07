@@ -20,9 +20,22 @@
 #include <stdio.h>
 
 #include "parse_cmd.h"
+#include "socket.h"
+
+#define BUF_LEN (10)
 
 static int socket_client_test(void)
 {
+	socket_t *socket;
+	link_ops_t *link_ops = get_link_ops();
+
+	socket = link_ops->create_client("socket");
+
+	link_ops->connect(socket, 3);
+
+	char buf[BUF_LEN] = "abc";
+	link_ops->write(socket, buf, sizeof(buf));
+
 	return 0;
 }
 

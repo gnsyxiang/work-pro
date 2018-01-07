@@ -21,9 +21,30 @@
 #include <unistd.h>
 
 #include "parse_cmd.h"
+#include "socket.h"
+
+#define BUF_LEN (10)
+
+void socket_cb(void *user, void *connection)
+{
+	link_ops_t *link_ops = get_link_ops();
+	socket_t *socket = connection;
+
+	char buf[BUF_LEN] = {0};
+	link_ops->read(socket, buf, 3);
+
+	printf("buf: %s \n", buf);
+}
 
 static int socket_server_test(void)
 {
+	socket_t *socket;
+	link_ops_t *link_ops = get_link_ops();
+
+	socket = link_ops->create_server("socket");
+
+	link_ops->wait_for_connect(socket, NULL, socket_cb);
+
 	return 0;
 }
 

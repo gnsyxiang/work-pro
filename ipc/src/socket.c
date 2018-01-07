@@ -1,19 +1,21 @@
-/*
- *  Copyright (C) 2017 Ingenic Semiconductor
- *
- *  MaWeiBin <weibin.ma@ingenic.com>
- *
- *  Elf/IDWS Project
- *
- *  This program is free software; you can redistribute it and/or modify it
- *  under the terms of the GNU General Public License as published by the
- *  Free Software Foundation; either version 2 of the License, or (at your
- *  option) any later version.
- *
- *  You should have received a copy of the GNU General Public License along
- *  with this program; if not, write to the Free Software Foundation, Inc.,
- *  675 Mass Ave, Cambridge, MA 02139, USA.
- *
+/**
+ * 
+ * Release under GPLv2.
+ * 
+ * @file    socket.c
+ * @brief   
+ * @author  gnsyxiang <gnsyxiang@163.com>
+ * @date    07/01 2018 18:18
+ * @version v0.0.1
+ * 
+ * @since    note
+ * @note     note
+ * 
+ *     change log:
+ *     NO.     Author              Date            Modified
+ *     00      zhenquan.qiu        07/01 2018      create the file
+ * 
+ *     last modified: 07/01 2018 18:18
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -28,10 +30,9 @@
 #include "log.h"
 #include "socket.h"
 
-static struct socket *create_socket_struct(
-        const char *name, int fd) {
-    struct socket *sok =
-            (struct socket *)malloc(sizeof(struct socket));
+static socket_t *create_socket_struct(const char *name, int fd)
+{
+    socket_t *sok = (socket_t *)malloc(sizeof(socket_t));
 
     sok->fd = fd;
     sok->name = name;
@@ -40,7 +41,8 @@ static struct socket *create_socket_struct(
     return sok;
 }
 
-static void *create_socket_client(const char *name) {
+static void *create_socket_client(const char *name)
+{
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (fd < 0) {
         log_e("%s: failed to create socket: %s(%d), name: %s\n",
@@ -55,7 +57,8 @@ static void *create_socket_client(const char *name) {
     return (void *)create_socket_struct(name, fd);
 }
 
-static void *create_socket_server(const char *name) {
+static void *create_socket_server(const char *name)
+{
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (fd < 0) {
         log_e("%s: failed to create socket: %s(%d), name: %s\n",
@@ -82,8 +85,9 @@ static void *create_socket_server(const char *name) {
     return (void *)create_socket_struct(name, fd);
 }
 
-static void delete_socket(void *socket) {
-    struct socket *sok = socket;
+static void delete_socket(void *socket)
+{
+    socket_t *sok = socket;
 
     close(sok->fd);
     pthread_mutex_destroy(&sok->lock);
@@ -91,7 +95,8 @@ static void delete_socket(void *socket) {
     free(sok);
 }
 
-static int write_buffer(int fd, const char *buf, int size) {
+static int write_buffer(int fd, const char *buf, int size)
+{
     int offset = 0;
     int sz = size;
 
@@ -110,7 +115,8 @@ static int write_buffer(int fd, const char *buf, int size) {
     return size;
 }
 
-static int read_buffer(int fd, char *buf, int size) {
+static int read_buffer(int fd, char *buf, int size)
+{
     int offset = 0;
     int sz = size;
 
@@ -129,8 +135,9 @@ static int read_buffer(int fd, char *buf, int size) {
     return size;
 }
 
-static int socket_write(void *socket, const void *buf, int size) {
-    struct socket *sok = socket;
+static int socket_write(void *socket, const void *buf, int size)
+{
+    socket_t *sok = socket;
 
     pthread_mutex_lock(&sok->lock);
 
@@ -141,8 +148,9 @@ static int socket_write(void *socket, const void *buf, int size) {
     return ret;
 }
 
-static int socket_read(void *socket, void *buf, int size) {
-    struct socket *sok = socket;
+static int socket_read(void *socket, void *buf, int size)
+{
+    socket_t *sok = socket;
 
     pthread_mutex_lock(&sok->lock);
 
@@ -153,8 +161,9 @@ static int socket_read(void *socket, void *buf, int size) {
     return ret;
 }
 
-static int socket_connect(void *socket, int timeout) {
-    struct socket *sok = socket;
+static int socket_connect(void *socket, int timeout)
+{
+    socket_t *sok = socket;
 
     struct sockaddr_un addr;
     addr.sun_family = AF_UNIX;
@@ -182,11 +191,9 @@ static int socket_connect(void *socket, int timeout) {
     return 0;
 }
 
-static int socket_wait_for_connect(
-        void *socket,
-        void *user,
-        link_connect_callback_t callback) {
-    struct socket *sok = socket;
+static int socket_wait_for_connect(void *socket, void *user, link_connect_callback_t callback)
+{
+    socket_t *sok = socket;
     int fd = sok->fd;
 
     int status = listen(fd, SOMAXCONN);
@@ -217,8 +224,7 @@ static int socket_wait_for_connect(
                 return -1;
             }
 
-            struct socket *new_sok =
-                    create_socket_struct(sok->name, fd);
+            socket_t *new_sok = create_socket_struct(sok->name, fd);
 
             /**
              * callback to link manager
@@ -230,8 +236,9 @@ static int socket_wait_for_connect(
     return 0;
 }
 
-int socket_get_fd(void *socket) {
-    struct socket *sok = (struct socket *)socket;
+int socket_get_fd(void *socket)
+{
+    socket_t *sok = (socket_t *)socket;
 
     if (sok == NULL)
         return -1;
@@ -239,19 +246,22 @@ int socket_get_fd(void *socket) {
     return sok->fd;
 }
 
-static struct link_ops link_ops = {
-        .create_client = create_socket_client,
-        .create_server = create_socket_server,
-        .delete = delete_socket,
-        .connect = socket_connect,
-        .wait_for_connect = socket_wait_for_connect,
-        .read = socket_read,
-        .write = socket_write,
-        .get_fd = socket_get_fd,
+static link_ops_t link_ops = {
+	.create_client		= create_socket_client,
+	.create_server		= create_socket_server,
+	.delete				= delete_socket,
+
+	.connect			= socket_connect,
+	.wait_for_connect	= socket_wait_for_connect,
+
+	.read				= socket_read,
+	.write				= socket_write,
+
+	.get_fd				= socket_get_fd,
 };
 
-struct link_ops *get_link_ops(void) {
+link_ops_t *get_link_ops(void)
+{
     return &link_ops;
 }
-
 

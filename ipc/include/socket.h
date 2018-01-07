@@ -1,5 +1,5 @@
 /**
- * Copyright (C) 2017 xxx Co., Ltd.
+ *
  * Release under GPLv2.
  * 
  * @file    socket.h
@@ -31,17 +31,16 @@ extern "C" {
 
 typedef void (*link_connect_callback_t)(void *user, void *connection);
 
-
-struct socket {
+typedef struct socket_tag {
     int fd;
     const char *name;
     pthread_mutex_t lock;
-};
+}socket_t;
 
 /**
  * for socket implement
  */
-struct link_ops {
+typedef struct link_ops_tag {
 	void *(*create_client)(const char *name);
 	void *(*create_server)(const char *name);
 	void (*delete)(void *connection);
@@ -53,9 +52,9 @@ struct link_ops {
 	int (*write)(void *connection, const void *buf, int size);
 
 	int (*get_fd)(void *connection);
-};
+}link_ops_t;
 
-struct link_ops *get_link_ops(void);
+link_ops_t *get_link_ops(void);
 
 #ifdef __cplusplus
 }

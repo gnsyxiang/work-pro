@@ -19,11 +19,13 @@
  */
 #ifndef __LOG_H__
 #define __LOG_H__
-#include <libgen.h>
 
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#include <libgen.h>
+#include <errno.h>
 
 enum {
     LOG_FATAL = 0,
@@ -34,11 +36,15 @@ enum {
     LOG_VERBOSE,
 };
 
+/*
 #define LOG_DEBUG(level, ...)                                          \
             log_debug(level, basename(__FILE__), __LINE__, __VA_ARGS__)       \
+*/
 
+#define LOG_DEBUG(level, ...)                                          \
+            log_debug(level, __FILE__, __LINE__, __func__, strerror(errno), __VA_ARGS__)       \
 
-void log_debug(int level, const char *file, int line, const char *fmt, ...);
+void log_debug(int level, const char *file, int line, const char *func, const char *err_str, const char *fmt, ...);
 
 #define log_d(...)      LOG_DEBUG(LOG_DEBUG, __VA_ARGS__)
 #define log_i(...)      LOG_DEBUG(LOG_INFO,  __VA_ARGS__)

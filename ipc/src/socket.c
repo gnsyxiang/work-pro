@@ -45,8 +45,7 @@ static void *create_socket_client(const char *name)
 {
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (fd < 0) {
-        log_e("%s: failed to create socket: %s(%d), name: %s\n",
-                        __func__, strerror(errno), -errno, name);
+        log_e("failed to create socket, name: %s", name);
 
         return NULL;
     }
@@ -61,8 +60,7 @@ static void *create_socket_server(const char *name)
 {
     int fd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (fd < 0) {
-        log_e("%s: failed to create socket: %s(%d), name: %s\n",
-                        __func__, strerror(errno), -errno, name);
+        log_e("failed to create socket, name: %s", name);
 
         return NULL;
     }
@@ -75,8 +73,7 @@ static void *create_socket_server(const char *name)
     int addrLen = strlen(name) + offsetof(struct sockaddr_un, sun_path);
     int status = bind(fd, (const struct sockaddr *)&addr, addrLen);
     if (status < 0) {
-        log_e("%s: failed to bind socket: %s(%d), name: %s\n",
-                        __func__, strerror(errno), -errno, name);
+        log_e("failed to bind socket, name: %s", name);
 
         close(fd);
         return NULL;
@@ -103,8 +100,7 @@ static int write_buffer(int fd, const char *buf, int size)
     while (sz > 0) {
         int bytes = write(fd, buf + offset, sz);
         if (bytes <= 0) {
-//            log_d("%s: write error, size: %d, %s(%d)\n",
-//                    __func__, size, strerror(errno), -errno);
+//            log_d("write error, size: %d", size);
             return bytes;
         }
 
@@ -123,8 +119,7 @@ static int read_buffer(int fd, char *buf, int size)
     while (sz > 0) {
         int bytes = read(fd, buf + offset, sz);
         if (bytes <= 0) {
-//            log_d("%s: read error, size: %d, %s(%d)\n",
-//                    __func__, size, strerror(errno), -errno);
+//            log_d("read error, size: %d", size);
             return bytes;
         }
 
@@ -174,7 +169,7 @@ static int socket_connect(void *socket, int timeout)
     int status;
     int time = 0;
 
-    log_e("%s: wait for connect to server\n", sok->name);
+    log_e("%s: wait for connect to server", sok->name);
 
     do {
         status = connect(sok->fd, (const struct sockaddr *)&addr, addrLen);
@@ -184,9 +179,9 @@ static int socket_connect(void *socket, int timeout)
     } while ((status < 0) && (time++ < timeout));
 
     if (status < 0)
-        log_e("%s: wait for connect to server error !!!\n", sok->name);
+        log_e("%s: wait for connect to server error !!!", sok->name);
     else
-        log_e("%s: connect to server\n", sok->name);
+        log_e("%s: connect to server", sok->name);
 
     return 0;
 }
@@ -198,8 +193,7 @@ static int socket_wait_for_connect(void *socket, void *user, link_connect_callba
 
     int status = listen(fd, SOMAXCONN);
     if (status < 0) {
-        log_e("%s: failed to listen socket: %s(%d), name: %s\n",
-                __func__, strerror(errno), -errno, sok->name);
+        log_e("failed to listen socket, name: %s", sok->name);
 
         return -1;
     }
@@ -211,16 +205,14 @@ static int socket_wait_for_connect(void *socket, void *user, link_connect_callba
 
         int ret = select(FD_SETSIZE, &read_fs, NULL, NULL, NULL);
         if (ret < 0) {
-            log_e("%s: select error: %s(%d)\n",
-                    __func__, strerror(errno), -errno);
+            log_e("select error");
             break;
         }
 
         if (FD_ISSET(sok->fd, &read_fs)) {
             int fd = accept(sok->fd, NULL, NULL);
             if (fd < 0) {
-                log_e("%s: failed to accept socket: %s(%d), name: %s\n",
-                            __func__, strerror(errno), -errno, sok->name);
+                log_e("failed to accept socket, name: %s", sok->name);
                 return -1;
             }
 

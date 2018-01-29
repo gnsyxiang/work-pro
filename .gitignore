@@ -53,5 +53,4 @@ dkms.conf
 
 # ignore files and dirs
 node_modules/
-main
 

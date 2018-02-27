@@ -112,7 +112,11 @@ mosquitto_sub -h test.mosquitto.org -t "#" -v
 
 > note: `test.mosquitto.org`支持加密和不加密MQTT消息模式，也支持用TCP或者Websocket作为承载，可以通过wireshark抓包来观察不同的包格式.
 
+## 配置信息
 
+详见`mosquitto.conf`
+
+## 命令行参数使用
 
 
 

@@ -1,169 +1,159 @@
-#include "cnt_vad.h"
+/**
+ * 
+ * Release under GPLv2.
+ * 
+ * @file    vad-cutting.c
+ * @brief   
+ * @author  gnsyxiang <gnsyxiang@163.com>
+ * @date    05/03 2018 16:29
+ * @version v0.0.1
+ * 
+ * @since    note
+ * @note     note
+ * 
+ *     change log:
+ *     NO.     Author              Date            Modified
+ *     00      zhenquan.qiu        05/03 2018      create the file
+ * 
+ *     last modified: 05/03 2018 16:29
+ */
 #include <stdio.h>
-#include <string.h>
-#include <assert.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <errno.h>
-#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <unistd.h>
 
 #include "wav_helper.h"
 #include "signal_helper.h"
 #include "cnt_vad.h"
+#include "log_helper.h"
 
-#define TEST_VAD_OLED
+#define DATA_POINT_LEN	(320)
+#define FRAME_LEN_MS	(20)
 
-#ifdef TEST_VAD_OLED
-#define DATA_POINT_LEN (320)
-#define FRAME_LEN_MS (20)
-#define FRAME_COUNT (7)
-#else
-#define DATA_POINT_LEN (160)
-#define FRAME_LEN_MS (10)
-#define FRAME_COUNT (5)
-#endif
+#define FRAME_COUNT		(10) // 连续语音时间，(FRAME_COUNT * FRAME_LEN_MS)
+#define SAVE_FRONT_CNT	(5)	 // 多保存前节点的长度，(SAVE_FRONT_CNT * FRAME_LEN_MS)
+#define SAVE_TAIL_CNT	(5)	 // 多保存前节点的长度，(SAVE_TAIL_CNT * FRAME_LEN_MS)
+#define VOICE_MID_CNT	(22) // 语音中，词与词之间的间隔时间，(VOICE_MID_CNT * FRAME_LEN_MS)
 
-const char *version="vad-cutting version: 0.0.3 ";
+#define WAV_DIR					"wav/"
+#define VAD_CUTTING_WAV_PATH	WAV_DIR"test.wav"
+#define VAD_SAVE_WAV_PATH		WAV_DIR"dst"
 
-int is_running = 0;
-short vad_flag = 0, sTempVad = 0, neVadCnt = 0;
+const char *version="vad-cutting version: 0.0.3";
 
-short vad_test()
+int vad_test(int (*voice_time)[2])
 {
-	short buffer[DATA_POINT_LEN];
-	static cntVadState vad_stat;
+	short buffer[DATA_POINT_LEN] = {0};
+	int frame_cnt = 0;
+	int vad_flag = 0, front_frame_cnt = 0;
+    int voice_flag = 0;
+    int voice_flag_cnt = 0;
+    int wav_num = 0;
+	int quit_cnt = 0;
+	short ret;
+	cntVadState vad_stat;
 
-	unsigned int iTimes = 0;
-    char * pcm0 = "vad_test.wav";
-
-	FILE *fPcm0 = fopen(pcm0,"rb");
-    fseek(fPcm0,44,SEEK_SET);
-
-	memset(buffer,0,sizeof(short) * DATA_POINT_LEN);
-
-	printf("------------2\n");
 	cntVAD16kInit(&vad_stat);
 
+	wav_file_t *wav_file = wav_file_open(VAD_CUTTING_WAV_PATH);
 
-    static int voice_flag = 0;
-    static int voice_flag_count = 0;
-    int voice_time[2000][2] = {0};
-    int voice_count = 0;
-#define VOICE_COUNT_ADD (0)
-
-	while (1){
-		if (fread(buffer, 2, DATA_POINT_LEN, fPcm0) <= 0)
+	while (1) {
+		if (wav_file_read(wav_file, buffer, DATA_POINT_LEN * 2) <= 0)
 			break;
 
-		sTempVad = cntVAD16k(buffer,&vad_stat);
-
-        if (1 == sTempVad)
-        {
-            neVadCnt++;
-            if (neVadCnt < FRAME_COUNT)	//连续300ms近端语音
-            {
-                vad_flag = 0;
-            }
-            else
-            {
-                vad_flag = 1;
-            }
-        }
-        else if(-3 == sTempVad)
-        {
-            printf("please do auth!\n");
-        }
-        else
-        {
-            neVadCnt=0;
-            vad_flag = 0;
-        }
-
-		if(vad_flag == 1)
-		{
-            voice_flag_count = 0;
-            if (voice_flag == 0) {
-                voice_flag = 1;
-                voice_time[voice_count][0] = iTimes - 30;
-            }
+		ret = cntVAD16k(buffer,&vad_stat);
+        if (1 == ret) {
+			/*log_i("time: %d.%d", frame_cnt * FRAME_LEN_MS / 1000, frame_cnt * FRAME_LEN_MS % 1000);*/
+			voice_flag_cnt = 0;
+            if (front_frame_cnt++ >= FRAME_COUNT) {
+				vad_flag = 1;
+			}
         } else {
-            if (voice_flag == 1 && voice_flag_count++ == 30) {
-                voice_flag_count = 0;
-                voice_flag = 0;
-
-                voice_time[voice_count++][1] = iTimes + VOICE_COUNT_ADD;
-            }
+			if (quit_cnt++ > 3) {
+				quit_cnt = 0;
+				front_frame_cnt = 0;
+				vad_flag = 0;
+			}
         }
 
-		iTimes++;
+		if(vad_flag == 1 && voice_flag == 0) {
+			voice_flag = 1;
+			voice_time[wav_num][0] = frame_cnt - FRAME_COUNT - SAVE_FRONT_CNT;
+			/*log_i("start: %d.%d", voice_time[wav_num][0] * FRAME_LEN_MS / 1000, voice_time[wav_num][0] * FRAME_LEN_MS % 1000);*/
+        } else if (voice_flag == 1 && voice_flag_cnt++ == VOICE_MID_CNT) {
+			voice_flag = 0;
 
-	}//end of while
-
-    char path[256] = {0};
-    static char voice_buf[20 * 16000 * 2];
-
-#define VAD_CUTTING_PATH "vad_cutting"
-
-    if (access(VAD_CUTTING_PATH, F_OK) != 0) {
-        mkdir(VAD_CUTTING_PATH, S_IRWXU);
-    }
-
-    for (int i = 0; i < voice_count; i++) {
-        printf("----timestamp:%d.%d is voice!\r\n", \
-            voice_time[i][0] * FRAME_LEN_MS / 1000, voice_time[i][0] * FRAME_LEN_MS % 1000);
-        printf("timestamp:%d.%d is voice!\r\n", \
-            voice_time[i][1] * FRAME_LEN_MS / 1000, voice_time[i][1] * FRAME_LEN_MS % 1000);
-
-        /* printf("%d - %d = %d \n", \ */
-                /* voice_time[i][1] * FRAME_LEN_MS, \ */
-                /* voice_time[i][0] * FRAME_LEN_MS, \ */
-                /* voice_time[i][1] * FRAME_LEN_MS - voice_time[i][0] * FRAME_LEN_MS); */
-
-        if (i >= 785) {
-            sprintf(path, "%s/%04d.wav", VAD_CUTTING_PATH, i+1);
-        } else {
-            sprintf(path, "%s/%04d.wav", VAD_CUTTING_PATH, i);
+			voice_time[wav_num][1] = frame_cnt - VOICE_MID_CNT + SAVE_TAIL_CNT;
+			wav_num++;
         }
 
-		wav_file_t *wav_file = wav_file_create(path, 1, 16000, 16);
+		frame_cnt++;
+	}
 
-        int voice_bytes = voice_time[i][0] * FRAME_LEN_MS * 16 * 2;
-        /* printf("start: %d \n", voice_bytes); */
+	wav_file_clean(wav_file);
 
-        fseek(fPcm0, voice_bytes, SEEK_SET);
-
-        int voice_last_bytes = (voice_time[i][1] - voice_time[i][0]) * FRAME_LEN_MS * 16 * 2;
-        /* printf("long: %d \n", voice_last_bytes); */
-
-        /* char *voice_buf = (char *)malloc(voice_last_bytes); */
-
-        fread(voice_buf, voice_last_bytes, 2, fPcm0);
-
-		wav_file_write(wav_file, voice_buf, voice_last_bytes);
-
-		wav_file_clean(wav_file);
-
-        /* free(voice_buf); */
-        printf("\n");
-    }
-
-    is_running = 0;
-    sleep(1);
-
-	fclose(fPcm0);
-	return 0;
+	return wav_num;
 }
 
-extern void register_linux_signal_hanler(const char *app_name);
+#define CHANNELS		(1)
+#define SAMPLE_RATE		(16000)
+#define BIT_PER_SAMPLE	(16)
+
+#define BYTES_OF_1S		(1 * SAMPLE_RATE * BIT_PER_SAMPLE / 8)
+#define BYTES_OF_1MS	(BYTES_OF_1S / 1000)
+
+#define WAV_S_LEN		(15)
+
+void save_wav(int (*voice_time)[2], int wav_num)
+{
+    char path[256] = {0};
+    static char voice_buf[WAV_S_LEN * BYTES_OF_1S] = {0};
+
+	wav_file_t *wav_test_file = wav_file_open(VAD_CUTTING_WAV_PATH);
+
+    if (access(VAD_SAVE_WAV_PATH, F_OK) != 0) {
+        mkdir(VAD_SAVE_WAV_PATH, S_IRWXU);
+    }
+
+    for (int i = 0; i < wav_num; i++) {
+		if (i >= 785)
+			sprintf(path, "%s/%04d.wav", VAD_SAVE_WAV_PATH, i+1);
+		else
+			sprintf(path, "%s/%04d.wav", VAD_SAVE_WAV_PATH, i);
+
+		wav_file_t *wav_file = wav_file_create(path, CHANNELS, SAMPLE_RATE, BIT_PER_SAMPLE);
+
+        int voice_bytes = voice_time[i][0] * FRAME_LEN_MS * BYTES_OF_1MS;
+        int voice_last_bytes = (voice_time[i][1] - voice_time[i][0]) * FRAME_LEN_MS * BYTES_OF_1MS;
+
+		wav_file_seek(wav_test_file, voice_bytes, SEEK_SET);
+		wav_file_read(wav_test_file, voice_buf, voice_last_bytes);
+
+		wav_file_write(wav_file, voice_buf, voice_last_bytes);
+		wav_file_clean(wav_file);
+
+		log_i("start: %d.%d", voice_time[i][0] * FRAME_LEN_MS / 1000, voice_time[i][0] * FRAME_LEN_MS % 1000);
+		log_i("-----------end: %d.%d", voice_time[i][1] * FRAME_LEN_MS / 1000, voice_time[i][1] * FRAME_LEN_MS % 1000);
+		printf("\n");
+    }
+
+	log_i("wav_num: %d", wav_num);
+
+	wav_file_clean(wav_test_file);
+}
 
 int main(int argc, char** argv)
 {
+    int voice_time[2000][2] = {0};
+
 	register_linux_signal_hanler(argv[0]);
 
-	vad_test();
-	printf("end...\r\n");
+	int wav_num = vad_test(voice_time);
+
+	save_wav(voice_time, wav_num);
+
+	log_i("vad cutting OK \n");
 
 	return 1;
 }
+

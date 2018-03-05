@@ -53,9 +53,10 @@ dkms.conf
 
 # ignore files and dirs
 node_modules/
-tags
-
 include/base-lib/
+vad-cutting/vad_cutting/
+
+tags
 main
-test.wav
+*.wav
 

@@ -55,3 +55,7 @@ dkms.conf
 node_modules/
 tags
 
+include/base-lib/
+main
+test.wav
+

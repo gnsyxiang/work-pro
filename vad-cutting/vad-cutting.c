@@ -21,6 +21,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <stdlib.h>
 
 #include "wav_helper.h"
 #include "signal_helper.h"
@@ -39,7 +40,7 @@
 #define VAD_CUTTING_WAV_PATH	WAV_DIR"test.wav"
 #define VAD_SAVE_WAV_PATH		WAV_DIR"dst"
 
-const char *version="vad-cutting version: 0.0.3";
+const char *version = "0.0.3";
 
 int vad_test(int (*voice_time)[2])
 {
@@ -142,12 +143,37 @@ void save_wav(int (*voice_time)[2], int wav_num)
 	wav_file_clean(wav_test_file);
 }
 
-int main(int argc, char** argv)
+void dis_help_info(const char *name)
 {
-    int voice_time[2000][2] = {0};
+	printf("vad cutting wav \n");
+	printf("\t -v	distplay version \n");
+	printf("\t -h	distplay help info \n");
+}
 
+void handle_external_param(int argc, char **argv)
+{
 	register_linux_signal_hanler(argv[0]);
 
+	int opt;
+	while(-1 != (opt = getopt(argc, argv, "vVhH"))) {
+		switch (opt) {
+			case 'v':
+			case 'V':
+				printf("%s version: %s (%s, %s) \n", argv[0], version, __DATE__, __TIME__);
+				exit(0);
+			case 'h':
+			default:
+				dis_help_info(argv[0]);
+				exit(0);
+		}
+	}
+}
+
+int main(int argc, char** argv)
+{
+	handle_external_param(argc, argv);
+
+    int voice_time[2000][2] = {0};
 	int wav_num = vad_test(voice_time);
 
 	save_wav(voice_time, wav_num);

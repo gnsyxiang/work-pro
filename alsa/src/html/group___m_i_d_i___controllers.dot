@@ -1,0 +1,9 @@
+digraph "MIDI Controllers"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir=LR;
+  Node1 [label="Constants for MIDI v1.0",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$group___m_i_d_i___interface.html"];
+  Node0 [label="MIDI Controllers",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1->Node0 [shape=plaintext, dir="back", style="solid"];
+}

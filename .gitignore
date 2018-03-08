@@ -55,6 +55,8 @@ dkms.conf
 node_modules/
 include/base-lib/
 vad-cutting/vad_cutting/
+build/
+install/
 
 tags
 main

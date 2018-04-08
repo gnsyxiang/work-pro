@@ -1,0 +1,11 @@
+digraph "Control Interface"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir=LR;
+  Node2 [label="Setup Control Interface",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$group___s_control.html"];
+  Node0 [label="Control Interface",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1 [label="High level Control\l Interface",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$group___h_control.html"];
+  Node0->Node1 [shape=plaintext, dir="back", style="solid"];
+  Node0->Node2 [shape=plaintext, dir="back", style="solid"];
+}

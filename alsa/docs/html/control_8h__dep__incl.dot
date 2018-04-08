@@ -1,0 +1,10 @@
+digraph "/home/uos/test/skills/work-pro/alsa/src/alsa-lib-1.1.5/include/control.h"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="/home/uos/test/skills\l/work-pro/alsa/src/alsa\l-lib-1.1.5/include/control.h",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="/home/uos/test/skills\l/work-pro/alsa/src/alsa\l-lib-1.1.5/include/control\l_external.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$control__external_8h.html",tooltip="External control plugin SDK. "];
+  Node2 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="/home/uos/test/skills\l/work-pro/alsa/src/alsa\l-lib-1.1.5/src/control\l/control_ext.c",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$control__ext_8c.html",tooltip="External Control Plugin SDK. "];
+}

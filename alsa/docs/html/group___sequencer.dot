@@ -1,0 +1,27 @@
+digraph "MIDI Sequencer"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  rankdir=LR;
+  Node5 [label="Sequencer Event API",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$group___seq_event.html"];
+  Node7 [label="Sequencer Event Type\l Checks",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$group___seq_ev_type.html"];
+  Node1 [label="Sequencer Client Interface",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$group___seq_client.html"];
+  Node0 [label="MIDI Sequencer",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node9 [label="Sequencer Middle Level\l Interface",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$group___seq_middle.html"];
+  Node10 [label="Sequencer event \<-\>\l MIDI byte stream coder",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$group___m_i_d_i___event.html"];
+  Node2 [label="Sequencer Port Interface",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$group___seq_port.html"];
+  Node3 [label="Sequencer Port Subscription",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$group___seq_subscribe.html"];
+  Node4 [label="Sequencer Queue Interface",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$group___seq_queue.html"];
+  Node6 [label="Sequencer Miscellaneous",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$group___seq_misc.html"];
+  Node8 [label="Sequencer Event Definitions",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$group___seq_events.html"];
+  Node0->Node1 [shape=plaintext, dir="back", style="solid"];
+  Node0->Node2 [shape=plaintext, dir="back", style="solid"];
+  Node0->Node3 [shape=plaintext, dir="back", style="solid"];
+  Node0->Node4 [shape=plaintext, dir="back", style="solid"];
+  Node0->Node5 [shape=plaintext, dir="back", style="solid"];
+  Node0->Node6 [shape=plaintext, dir="back", style="solid"];
+  Node0->Node7 [shape=plaintext, dir="back", style="solid"];
+  Node0->Node8 [shape=plaintext, dir="back", style="solid"];
+  Node0->Node9 [shape=plaintext, dir="back", style="solid"];
+  Node0->Node10 [shape=plaintext, dir="back", style="solid"];
+}

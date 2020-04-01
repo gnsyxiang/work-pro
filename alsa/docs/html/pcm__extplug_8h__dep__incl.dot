@@ -1,0 +1,10 @@
+digraph "/home/uos/test/skills/work-pro/alsa/src/alsa-lib-1.1.5/include/pcm_extplug.h"
+{
+  edge [fontname="Helvetica",fontsize="10",labelfontname="Helvetica",labelfontsize="10"];
+  node [fontname="Helvetica",fontsize="10",shape=record];
+  Node1 [label="/home/uos/test/skills\l/work-pro/alsa/src/alsa\l-lib-1.1.5/include/pcm\l_extplug.h",height=0.2,width=0.4,color="black", fillcolor="grey75", style="filled", fontcolor="black"];
+  Node1 -> Node2 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node2 [label="/home/uos/test/skills\l/work-pro/alsa/src/alsa\l-lib-1.1.5/include/pcm\l_external.h",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$pcm__external_8h.html",tooltip="External PCM plugin SDK. "];
+  Node1 -> Node3 [dir="back",color="midnightblue",fontsize="10",style="solid",fontname="Helvetica"];
+  Node3 [label="/home/uos/test/skills\l/work-pro/alsa/src/alsa\l-lib-1.1.5/src/pcm/pcm\l_extplug.c",height=0.2,width=0.4,color="black", fillcolor="white", style="filled",URL="$pcm__extplug_8c.html",tooltip="External Filter Plugin SDK. "];
+}
